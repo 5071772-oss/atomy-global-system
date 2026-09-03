@@ -1,7 +1,7 @@
 import type { BookingInput } from "./booking-schema";
 
 const GOOGLE_APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycby5GfZOg4KS-gh_dvx2ImyGM_tBVEW_YY-M8Wc-oNwmD6JnR5R2AIFytl_JCfvb1DTSig/exec";
+  "https://script.google.com/macros/s/AKfycbx5z-P1Mz2FE95j4VM3L-R7Y9CnC14KWcnWUS-XvBey3uchNChb-iCSIjoaT0ByaqN7/exec";
 
 export async function appendBookingRow(data: BookingInput): Promise<void> {
   const submittedAt = new Date().toLocaleString("ru-RU", { timeZone: "Europe/Moscow" });
@@ -14,17 +14,21 @@ export async function appendBookingRow(data: BookingInput): Promise<void> {
     name: `${data.firstName} ${data.lastName}`.trim(),
     firstName: data.firstName,
     lastName: data.lastName,
-    // The Apps Script endpoint currently maps these two keys in reverse order.
-    // Keep the submitted values correct in the sheet's Email (C) and Phone (D) columns.
-    email: data.phone,
-    phone: data.email,
+    // Match the sheet columns exactly: C = Email, D = Телефон.
+    email: data.email,
+    phone: data.phone,
     country: data.country,
     city: data.city,
+    // Provide the date/time aliases used by the deployed Apps Script.
     date: data.day,
     day: data.day,
+    callDate: data.day,
+    consultationDate: data.day,
     time: data.time,
+    callTime: data.time,
+    consultationTime: data.time,
     goal: data.goal,
-    personalDataConsent: data.personalDataConsent ? "Да" : "Нет",
+    personalDataConsent: data.personalDataConsent,
   };
 
   const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {

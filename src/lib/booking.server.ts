@@ -1,7 +1,7 @@
 import { google } from "googleapis";
 import type { BookingInput } from "./booking-schema";
 
-const SPREADSHEET_ID = "1AVafc0SckLe3KRfPzO9S9v_WwzNoDbQXJmHkGSjJoqw";
+const SPREADSHEET_ID = "1LVJu2ukwSLkj7T1MrSuma-TbW0RqcU6hrv_DQWYiDTU";
 const SHEET_NAME = "Leads";
 const SERVICE_ACCOUNT_EMAIL = "atomy-leads@atomy-leads-integration.iam.gserviceaccount.com";
 

@@ -14,15 +14,19 @@ export async function appendBookingRow(data: BookingInput): Promise<void> {
     name: `${data.firstName} ${data.lastName}`.trim(),
     firstName: data.firstName,
     lastName: data.lastName,
-    // The Apps Script endpoint currently maps these two keys in reverse order.
-    // Keep the submitted values correct in the sheet's Email (C) and Phone (D) columns.
-    email: data.phone,
-    phone: data.email,
+    // Match the sheet columns exactly: C = Email, D = Телефон.
+    email: data.email,
+    phone: data.phone,
     country: data.country,
     city: data.city,
+    // Provide the date/time aliases used by the deployed Apps Script.
     date: data.day,
     day: data.day,
+    callDate: data.day,
+    consultationDate: data.day,
     time: data.time,
+    callTime: data.time,
+    consultationTime: data.time,
     goal: data.goal,
     personalDataConsent: data.personalDataConsent ? "Да" : "Нет",
   };

@@ -31,23 +31,26 @@ export async function appendBookingRow(data: BookingInput): Promise<void> {
     personalDataConsent: data.personalDataConsent,
   };
 
-  // Google Apps Script returns a redirect after processing doPost. Keep the
-  // redirect manual: following it can turn the POST into a GET and discard
-  // the JSON body. A 3xx response is the success response for this endpoint.
+  // Apps Script web apps respond with a redirect after doPost finishes.
+  // Let fetch follow it so we can inspect the JSON result from the deployed
+  // script instead of treating every redirect (including script errors) as success.
   const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
     method: "POST",
-    redirect: "manual",
+    redirect: "follow",
     headers: { "content-type": "application/json; charset=utf-8" },
     body: JSON.stringify(payload),
     signal: AbortSignal.timeout(20_000),
   });
 
   const responseBody = await response.text();
-  const isAppsScriptRedirect =
-    response.status >= 300 && response.status < 400 &&
-    Boolean(response.headers.get("location"));
+  let result: { ok?: boolean; error?: string } | null = null;
+  try {
+    result = JSON.parse(responseBody) as { ok?: boolean; error?: string };
+  } catch {
+    // Apps Script may return an HTML error page when the deployment fails.
+  }
 
-  if (!response.ok && !isAppsScriptRedirect) {
+  if (!response.ok || result?.ok === false || !result?.ok) {
     let errorMessage = responseBody || "Google Apps Script did not accept the request";
     try {
       const result = JSON.parse(responseBody) as { error?: string; ok?: boolean };

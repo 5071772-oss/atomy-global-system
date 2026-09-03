@@ -60,7 +60,8 @@ export function BookingModal({
           city: get("city"),
           phone,
           email: get("email"),
-          day: format(date, "EEEE, d MMMM yyyy", { locale: ru }),
+          // Keep the value sent to the server machine-readable for Sheets.
+          day: format(date, "yyyy-MM-dd"),
           time: slot,
           goal: get("goal"),
           personalDataConsent,
@@ -203,7 +204,7 @@ export function BookingModal({
               <span>
                 Я согласен(а) на обработку персональных данных и принимаю условия{" "}
                 <Link to="/privacy" className="text-primary underline underline-offset-2">
-                  политик�� обработки данных
+                  политики обработки данных
                 </Link>
                 .
               </span>

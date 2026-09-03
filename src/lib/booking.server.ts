@@ -1,65 +1,46 @@
+import { google } from "googleapis";
 import type { BookingInput } from "./booking-schema";
 
-const GOOGLE_APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbyOpH7s7u1mZBnfbF55CVTP7Bld4uLrc2mZfJdEan-RFCgwya8ZsAgc7__6Ec77RD4BhQ/exec";
+const SPREADSHEET_ID = "1AVafc0SckLe3KRfPzO9S9v_WwzNoDbQXJmHkGSjJoqw";
+const SHEET_NAME = "Leads";
+const SERVICE_ACCOUNT_EMAIL = "atomy-leads@atomy-leads-integration.iam.gserviceaccount.com";
+
+function getGoogleAuth() {
+  const privateKey = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY?.replace(/\\n/g, "\n");
+  if (!privateKey) {
+    throw new Error("Google Service Account private key is not configured");
+  }
+
+  return new google.auth.JWT({
+    email: SERVICE_ACCOUNT_EMAIL,
+    key: privateKey,
+    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+  });
+}
 
 export async function appendBookingRow(data: BookingInput): Promise<void> {
+  const auth = getGoogleAuth();
+  const sheets = google.sheets({ version: "v4", auth });
   const submittedAt = new Date().toLocaleString("ru-RU", { timeZone: "Europe/Moscow" });
-  const timestamp = new Date().toISOString();
-  const payload = {
-    // These aliases match the Google Apps Script column mapping:
-    // A timestamp, B name, C email, D phone, E country, F call date, G time.
-    timestamp,
+  const row = [
     submittedAt,
-    name: `${data.firstName} ${data.lastName}`.trim(),
-    firstName: data.firstName,
-    lastName: data.lastName,
-    // Match the sheet columns exactly: C = Email, D = Телефон.
-    email: data.email,
-    phone: data.phone,
-    country: data.country,
-    city: data.city,
-    // Provide the date/time aliases used by the deployed Apps Script.
-    date: data.day,
-    day: data.day,
-    callDate: data.day,
-    consultationDate: data.day,
-    time: data.time,
-    callTime: data.time,
-    consultationTime: data.time,
-    goal: data.goal,
-    personalDataConsent: data.personalDataConsent,
-  };
+    data.firstName,
+    data.lastName,
+    data.email,
+    data.phone,
+    data.country || "",
+    data.city,
+    data.day,
+    data.time,
+    data.goal,
+    data.personalDataConsent ? "Да" : "Нет",
+  ];
 
-  // Apps Script web apps respond with a redirect after doPost finishes.
-  // Let fetch follow it so we can inspect the JSON result from the deployed
-  // script instead of treating every redirect (including script errors) as success.
-  const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
-    method: "POST",
-    redirect: "follow",
-    headers: { "content-type": "application/json; charset=utf-8" },
-    body: JSON.stringify(payload),
-    signal: AbortSignal.timeout(20_000),
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: SPREADSHEET_ID,
+    range: `${SHEET_NAME}!A:K`,
+    valueInputOption: "USER_ENTERED",
+    insertDataOption: "INSERT_ROWS",
+    requestBody: { values: [row] },
   });
-
-  const responseBody = await response.text();
-  let result: { ok?: boolean; error?: string } | null = null;
-  try {
-    result = JSON.parse(responseBody) as { ok?: boolean; error?: string };
-  } catch {
-    // Apps Script may return an HTML error page when the deployment fails.
-  }
-
-  if (!response.ok || result?.ok === false || !result?.ok) {
-    let errorMessage = responseBody || "Google Apps Script did not accept the request";
-    try {
-      const result = JSON.parse(responseBody) as { error?: string; ok?: boolean };
-      if (result.error) errorMessage = result.error;
-      if (result.ok === false) errorMessage = result.error || errorMessage;
-    } catch {
-      // Keep the provider response as the useful error message.
-    }
-    console.error(`Sheets append failed [${response.status}]: ${responseBody}`);
-    throw new Error(`Sheets append failed [${response.status}]: ${errorMessage}`);
-  }
 }

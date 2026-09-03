@@ -29,8 +29,8 @@ export function BookingModal({
   open: boolean;
   onOpenChange: (v: boolean) => void;
 }) {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [slot, setSlot] = useState<string>(SLOTS[1]!);
+  const [date, setDate] = useState<Date | undefined>();
+  const [slot, setSlot] = useState<string>("");
   const [sending, setSending] = useState(false);
   const send = useServerFn(submitBooking);
 
@@ -42,8 +42,8 @@ export function BookingModal({
     const lastName = get("lastName");
     const phone = get("phone");
     const personalDataConsent = data.get("personalDataConsent") === "on";
-    if (!firstName || !lastName || !phone || !date) {
-      toast.error("Укажите имя, фамилию, телефон и удобную дату.");
+    if (!firstName || !lastName || !phone || !date || !slot) {
+      toast.error("Укажите имя, фамилию, дату и время консультации.");
       return;
     }
     if (!personalDataConsent) {
@@ -91,7 +91,9 @@ export function BookingModal({
 
         <form onSubmit={submit} className="mt-2 grid gap-6 md:grid-cols-2">
           <div>
-            <Label className="text-xs font-bold tracking-wider uppercase">Выберите дату</Label>
+            <Label className="text-xs font-bold tracking-wider uppercase">
+              Выберите дату <span className="text-destructive">*</span>
+            </Label>
             <div className="bg-surface/70 mt-3 rounded-2xl border p-1">
               <Calendar
                 mode="single"
@@ -104,7 +106,8 @@ export function BookingModal({
             </div>
             <div className="mt-4">
               <Label className="text-xs font-bold tracking-wider uppercase">Свободное время</Label>
-              <div className="mt-3 grid grid-cols-3 gap-2">
+              <div className="mt-3 grid grid-cols-3 gap-2" aria-required="true">
+                <span className="sr-only">Выбор времени обязателен</span>
                 {SLOTS.map((s) => (
                   <button
                     key={s}
@@ -200,7 +203,7 @@ export function BookingModal({
               <span>
                 Я согласен(а) на обработку персональных данных и принимаю условия{" "}
                 <Link to="/privacy" className="text-primary underline underline-offset-2">
-                  политики обработки данных
+                  политик�� обработки данных
                 </Link>
                 .
               </span>

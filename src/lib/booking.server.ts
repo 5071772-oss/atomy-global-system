@@ -1,44 +1,35 @@
 import type { BookingInput } from "./booking-schema";
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_sheets/v4";
-const SPREADSHEET_ID = "1eNDWek686SX1e6w_PxPwDeE8Yd3_Yix8x42Mi4eYj60";
-const SHEET_RANGE = "'Заявки с сайта'!A:L";
+const GOOGLE_APPS_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycby5GfZOg4KS-gh_dvx2ImyGM_tBVEW_YY-M8Wc-oNwmD6JnR5R2AIFytl_JCfvb1DTSig/exec";
 
 export async function appendBookingRow(data: BookingInput): Promise<void> {
-  const lovableKey = process.env["LOVABLE_API_KEY"];
-  const connectionKey = process.env["GOOGLE_SHEETS_API_KEY"];
-  if (!lovableKey || !connectionKey) {
-    throw new Error("Google Sheets connection is not configured");
-  }
-
   const submittedAt = new Date().toLocaleString("ru-RU", { timeZone: "Europe/Moscow" });
-  const row = [
+  const timestamp = new Date().toISOString();
+  const payload = {
+    // These aliases match the Google Apps Script column mapping:
+    // A timestamp, B name, C email, D phone, E country, F call date, G time.
+    timestamp,
     submittedAt,
-    data.firstName,
-    data.lastName,
-    data.country,
-    data.city,
-    data.phone,
-    data.email,
-    data.day,
-    data.time,
-    data.goal,
-    data.personalDataConsent ? "Да" : "Нет",
-    new Date().toISOString(),
-  ];
+    name: `${data.firstName} ${data.lastName}`.trim(),
+    firstName: data.firstName,
+    lastName: data.lastName,
+    email: data.email,
+    phone: data.phone,
+    country: data.country,
+    city: data.city,
+    date: data.day,
+    day: data.day,
+    time: data.time,
+    goal: data.goal,
+    personalDataConsent: data.personalDataConsent ? "Да" : "Нет",
+  };
 
-  const response = await fetch(
-    `${GATEWAY_URL}/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_RANGE}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${lovableKey}`,
-        "X-Connection-Api-Key": connectionKey,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({ values: [row] }),
-    },
-  );
+  const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(payload),
+  });
 
   if (!response.ok) {
     const errorBody = await response.text();

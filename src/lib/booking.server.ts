@@ -31,26 +31,32 @@ export async function appendBookingRow(data: BookingInput): Promise<void> {
     personalDataConsent: data.personalDataConsent,
   };
 
-  // Apps Script returns a 302 after doPost. Following it can turn the POST
-  // into a GET and lose the request body.
+  // Google Apps Script returns a redirect after processing doPost. Keep the
+  // redirect manual: following it can turn the POST into a GET and discard
+  // the JSON body. A 3xx response is the success response for this endpoint.
   const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
     method: "POST",
     redirect: "manual",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json; charset=utf-8" },
     body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(20_000),
   });
 
   const responseBody = await response.text();
-  let result: { ok?: boolean; error?: string } = {};
-  try {
-    result = JSON.parse(responseBody) as typeof result;
-  } catch {
-    // Apps Script normally responds with a redirect after processing doPost.
-  }
+  const isAppsScriptRedirect =
+    response.status >= 300 && response.status < 400 &&
+    Boolean(response.headers.get("location"));
 
-  const processedByAppsScript = response.status >= 300 && response.status < 400;
-  if ((!response.ok && !processedByAppsScript) || result.ok === false) {
+  if (!response.ok && !isAppsScriptRedirect) {
+    let errorMessage = responseBody || "Google Apps Script did not accept the request";
+    try {
+      const result = JSON.parse(responseBody) as { error?: string; ok?: boolean };
+      if (result.error) errorMessage = result.error;
+      if (result.ok === false) errorMessage = result.error || errorMessage;
+    } catch {
+      // Keep the provider response as the useful error message.
+    }
     console.error(`Sheets append failed [${response.status}]: ${responseBody}`);
-    throw new Error(`Sheets append failed [${response.status}]: ${result.error || responseBody}`);
+    throw new Error(`Sheets append failed [${response.status}]: ${errorMessage}`);
   }
 }

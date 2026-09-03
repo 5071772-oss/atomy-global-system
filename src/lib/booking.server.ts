@@ -1,7 +1,7 @@
 import type { BookingInput } from "./booking-schema";
 
 const GOOGLE_APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbx5z-P1Mz2FE95j4VM3L-R7Y9CnC14KWcnWUS-XvBey3uchNChb-iCSIjoaT0ByaqN7/exec";
+  "https://script.google.com/macros/s/AKfycbyOpH7s7u1mZBnfbF55CVTP7Bld4uLrc2mZfJdEan-RFCgwya8ZsAgc7__6Ec77RD4BhQ/exec";
 
 export async function appendBookingRow(data: BookingInput): Promise<void> {
   const submittedAt = new Date().toLocaleString("ru-RU", { timeZone: "Europe/Moscow" });
@@ -31,15 +31,26 @@ export async function appendBookingRow(data: BookingInput): Promise<void> {
     personalDataConsent: data.personalDataConsent,
   };
 
+  // Apps Script returns a 302 after doPost. Following it can turn the POST
+  // into a GET and lose the request body.
   const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
     method: "POST",
+    redirect: "manual",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(payload),
   });
 
-  if (!response.ok) {
-    const errorBody = await response.text();
-    console.error(`Sheets append failed [${response.status}]: ${errorBody}`);
-    throw new Error(`Sheets append failed [${response.status}]: ${errorBody}`);
+  const responseBody = await response.text();
+  let result: { ok?: boolean; error?: string } = {};
+  try {
+    result = JSON.parse(responseBody) as typeof result;
+  } catch {
+    // Apps Script normally responds with a redirect after processing doPost.
+  }
+
+  const processedByAppsScript = response.status >= 300 && response.status < 400;
+  if ((!response.ok && !processedByAppsScript) || result.ok === false) {
+    console.error(`Sheets append failed [${response.status}]: ${responseBody}`);
+    throw new Error(`Sheets append failed [${response.status}]: ${result.error || responseBody}`);
   }
 }

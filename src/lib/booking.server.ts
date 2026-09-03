@@ -20,10 +20,28 @@ export async function appendBookingRow(data: BookingInput): Promise<void> {
     new Date().toISOString(),
   ];
 
+  const payload = {
+    // Keep the named fields because the Apps Script reads the request as an object.
+    submittedAt,
+    firstName: data.firstName,
+    lastName: data.lastName,
+    country: data.country,
+    city: data.city,
+    phone: data.phone,
+    email: data.email,
+    day: data.day,
+    time: data.time,
+    goal: data.goal,
+    personalDataConsent: data.personalDataConsent,
+    timestamp: new Date().toISOString(),
+    // Keep the row as a fallback for scripts that append a supplied array.
+    values: [row],
+  };
+
   const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ values: [row] }),
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {

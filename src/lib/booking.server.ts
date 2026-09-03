@@ -31,8 +31,11 @@ export async function appendBookingRow(data: BookingInput): Promise<void> {
     personalDataConsent: data.personalDataConsent,
   };
 
+  // Apps Script returns a 302 after doPost. Following it can turn the POST
+  // into a GET and lose the request body.
   const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
     method: "POST",
+    redirect: "manual",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(payload),
   });
@@ -42,10 +45,11 @@ export async function appendBookingRow(data: BookingInput): Promise<void> {
   try {
     result = JSON.parse(responseBody) as typeof result;
   } catch {
-    // Keep the raw response in the error below when Apps Script returns non-JSON.
+    // Apps Script normally responds with a redirect after processing doPost.
   }
 
-  if (!response.ok || result.ok === false) {
+  const processedByAppsScript = response.status >= 300 && response.status < 400;
+  if ((!response.ok && !processedByAppsScript) || result.ok === false) {
     console.error(`Sheets append failed [${response.status}]: ${responseBody}`);
     throw new Error(`Sheets append failed [${response.status}]: ${result.error || responseBody}`);
   }

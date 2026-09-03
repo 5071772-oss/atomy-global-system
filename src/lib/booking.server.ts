@@ -1,7 +1,7 @@
 import type { BookingInput } from "./booking-schema";
 
 const GOOGLE_APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycby5GfZOg4KS-gh_dvx2ImyGM_tBVEW_YY-M8Wc-oNwmD6JnR5R2AIFytl_JCfvb1DTSig/exec";
+  "https://script.google.com/macros/s/AKfycbx5z-P1Mz2FE95j4VM3L-R7Y9CnC14KWcnWUS-XvBey3uchNChb-iCSIjoaT0ByaqN7/exec";
 
 export async function appendBookingRow(data: BookingInput): Promise<void> {
   const submittedAt = new Date().toLocaleString("ru-RU", { timeZone: "Europe/Moscow" });
@@ -28,7 +28,7 @@ export async function appendBookingRow(data: BookingInput): Promise<void> {
     callTime: data.time,
     consultationTime: data.time,
     goal: data.goal,
-    personalDataConsent: data.personalDataConsent ? "Да" : "Нет",
+    personalDataConsent: data.personalDataConsent,
   };
 
   const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {

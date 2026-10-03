@@ -75,7 +75,9 @@ export function BookingModal({
       toast.success(
         `Заявка отправлена — ${format(date, "EEE, d MMM", { locale: ru })}, ${slot}. Команда Галины подтвердит время.`,
       );
-    } catch {
+    } catch (error) {
+      // Ошибку видно в консоли браузера: без неё причину не разобрать.
+      console.error("Не удалось отправить заявку", error);
       toast.error("Не удалось отправить заявку. Попробуйте ещё раз.");
     } finally {
       setSending(false);

@@ -18,7 +18,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useServerFn } from "@tanstack/react-start";
-import { submitBooking } from "@/lib/booking.functions";
+import { copyBookingToSheets } from "@/lib/booking.functions";
+import { sendBookingToChatium } from "@/lib/lead-intake";
 import { captureAttribution } from "@/lib/attribution";
 
 const SLOTS = ["09:00", "11:30", "14:00", "16:30", "19:00", "20:30"];
@@ -33,7 +34,7 @@ export function BookingModal({
   const [date, setDate] = useState<Date | undefined>();
   const [slot, setSlot] = useState<string>("");
   const [sending, setSending] = useState(false);
-  const send = useServerFn(submitBooking);
+  const copyToSheets = useServerFn(copyBookingToSheets);
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -53,24 +54,33 @@ export function BookingModal({
     }
     setSending(true);
     try {
-      const attribution = captureAttribution();
-      await send({
-        data: {
-          firstName,
-          lastName,
-          country: get("country"),
-          city: get("city"),
-          phone,
-          email: get("email"),
-          day: format(date, "EEEE, d MMMM yyyy", { locale: ru }),
-          callDate: format(date, "yyyy-MM-dd"),
-          time: slot,
-          goal: get("goal"),
-          personalDataConsent,
-          ...attribution,
-          company: get("company"),
-        },
-      });
+      const booking = {
+        firstName,
+        lastName,
+        country: get("country"),
+        city: get("city"),
+        phone,
+        email: get("email"),
+        day: format(date, "EEEE, d MMMM yyyy", { locale: ru }),
+        callDate: format(date, "yyyy-MM-dd"),
+        time: slot,
+        goal: get("goal"),
+        personalDataConsent: true as const,
+        ...captureAttribution(),
+        company: get("company"),
+      };
+
+      // Запись уходит в Chatium прямо из браузера — минуя серверные функции сайта.
+      const result = await sendBookingToChatium(booking);
+
+      // Копия в Google Sheets — запасной канал: её сбой запись не отменяет,
+      // и роботу, который попался в ловушку, копия тоже не нужна.
+      if (!result.skipped) {
+        void copyToSheets({ data: booking }).catch((error: unknown) => {
+          console.info("Копия записи в Google Sheets не сделана", error);
+        });
+      }
+
       onOpenChange(false);
       toast.success(
         `Заявка отправлена — ${format(date, "EEE, d MMM", { locale: ru })}, ${slot}. Команда Галины подтвердит время.`,

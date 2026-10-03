@@ -1,4 +1,4 @@
-import { Mail, MessageCircle, Zap } from "lucide-react";
+import { MessageCircle, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NAV_LINKS } from "./data";
 
@@ -41,9 +41,6 @@ export function SiteFooter({ onBook }: { onBook: () => void }) {
           <div>
             <div className="text-xs font-bold tracking-wider uppercase">Связаться</div>
             <div className="text-muted-foreground mt-4 grid gap-3 text-sm">
-              <span className="flex items-center gap-2">
-                <Mail className="size-4" /> mentor@atomyglobalengine.com
-              </span>
               <span className="flex items-center gap-2">
                 <MessageCircle className="size-4" /> Личный мессенджер после записи
               </span>

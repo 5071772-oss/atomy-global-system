@@ -12,7 +12,7 @@ import { BookingModal } from "@/components/site/BookingModal";
 
 const TITLE = "Atomy Global Engine — доход 91 000 ₽ в месяц";
 const DESCRIPTION =
-  "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            Проверь сборку при деплое через GitHub Actions и исправь ошибку, чтобы проект собирался без сбоев.";
+  "Система наставничества для партнёров Atomy: два измеримых действия в месяц, поддержка наставника Галины Николаевой и разбор, как растёт структура и доход.";
 
 
 export const Route = createFileRoute("/")({

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { CalendarCheck, Clock, Loader2 } from "lucide-react";
 import { format } from "date-fns";
@@ -21,6 +21,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { copyBookingToSheets } from "@/lib/booking.functions";
 import { sendBookingToChatium } from "@/lib/lead-intake";
 import { captureAttribution } from "@/lib/attribution";
+import { GOALS, reachGoal } from "@/lib/analytics";
 
 const SLOTS = ["09:00", "11:30", "14:00", "16:30", "19:00", "20:30"];
 
@@ -35,6 +36,11 @@ export function BookingModal({
   const [slot, setSlot] = useState<string>("");
   const [sending, setSending] = useState(false);
   const copyToSheets = useServerFn(copyBookingToSheets);
+
+  // Цель Метрики: человек открыл форму записи.
+  useEffect(() => {
+    if (open) reachGoal(GOALS.bookingOpen);
+  }, [open]);
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -72,6 +78,7 @@ export function BookingModal({
 
       // Запись уходит в Chatium прямо из браузера — минуя серверные функции сайта.
       const result = await sendBookingToChatium(booking);
+      reachGoal(GOALS.bookingSubmit);
 
       // Копия в Google Sheets — запасной канал: её сбой запись не отменяет,
       // и роботу, который попался в ловушку, копия тоже не нужна.

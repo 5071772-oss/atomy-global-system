@@ -18,6 +18,10 @@ function getGoogleAuth() {
   });
 }
 
+/**
+ * Запасная копия записи в Google Sheets. Основной приём — Chatium
+ * (`lead-intake.server.ts`): сбой копии запись не отменяет.
+ */
 export async function appendBookingRow(data: BookingInput): Promise<void> {
   const auth = getGoogleAuth();
   const sheets = google.sheets({ version: "v4", auth });

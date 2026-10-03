@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useServerFn } from "@tanstack/react-start";
 import { submitBooking } from "@/lib/booking.functions";
+import { captureAttribution } from "@/lib/attribution";
 
 const SLOTS = ["09:00", "11:30", "14:00", "16:30", "19:00", "20:30"];
 
@@ -52,6 +53,7 @@ export function BookingModal({
     }
     setSending(true);
     try {
+      const attribution = captureAttribution();
       await send({
         data: {
           firstName,
@@ -61,9 +63,12 @@ export function BookingModal({
           phone,
           email: get("email"),
           day: format(date, "EEEE, d MMMM yyyy", { locale: ru }),
+          callDate: format(date, "yyyy-MM-dd"),
           time: slot,
           goal: get("goal"),
           personalDataConsent,
+          ...attribution,
+          company: get("company"),
         },
       });
       onOpenChange(false);
@@ -90,6 +95,11 @@ export function BookingModal({
         </DialogHeader>
 
         <form onSubmit={submit} className="mt-2 grid gap-6 md:grid-cols-2">
+          {/* Ловушка для роботов: человек этого поля не видит и не заполняет. */}
+          <div className="hidden" aria-hidden="true">
+            <label htmlFor="company">Компания</label>
+            <input id="company" name="company" type="text" tabIndex={-1} autoComplete="off" />
+          </div>
           <div>
             <Label className="text-xs font-bold tracking-wider uppercase">
               Выберите дату <span className="text-destructive">*</span>

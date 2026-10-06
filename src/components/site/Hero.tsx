@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Globe2, PlayCircle, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroNetwork from "@/assets/hero-network.jpg";
+import heroNetwork from "@/assets/hero-network.webp";
+import heroNetwork1200 from "@/assets/hero-network-1200.webp";
+import heroNetwork900 from "@/assets/hero-network-900.webp";
 import { formatRub } from "./data";
 
 const TARGET = 91000;
@@ -34,9 +36,12 @@ export function Hero({ onBook }: { onBook: () => void }) {
     <section id="top" className="relative overflow-hidden pt-34 pb-20 lg:pt-42 lg:pb-28">
       <img
         src={heroNetwork}
+        srcSet={`${heroNetwork900} 900w, ${heroNetwork1200} 1200w, ${heroNetwork} 1600w`}
+        sizes="(min-width: 1024px) 62vw, 100vw"
         alt="Визуализация глобальной партнёрской сети"
         width={1600}
         height={1008}
+        decoding="async"
         className="pointer-events-none absolute top-0 right-0 h-full w-full object-cover opacity-35 lg:w-[62%]"
       />
       <div className="from-background via-background/85 to-background/20 absolute inset-0 bg-gradient-to-r" />

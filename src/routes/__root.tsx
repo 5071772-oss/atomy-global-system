@@ -100,13 +100,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap",
-      },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      // Шрифт лежит у себя в проекте: предзагружаем кириллицу, на ней основной текст.
+      {
+        rel: "preload",
+        href: "/fonts/cyrillic.woff2",
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
     ],
     // Счётчик Метрики подключается, когда в src/lib/site.ts появится его номер.
     scripts: METRIKA_COUNTER_ID

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/site/Navbar";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { useState } from "react";
-import { BookingModal } from "@/components/site/BookingModal";
+import { BookingModalLazy as BookingModal } from "@/components/site/BookingModalLazy";
 import { CheckCircle2, ShieldCheck, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

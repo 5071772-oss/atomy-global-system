@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { useServerFn } from '@tanstack/react-start';
@@ -32,6 +31,9 @@ function AuthPage() {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
+    // Клиент Supabase подключается только здесь: на остальных страницах сайта
+    // эта библиотека не нужна и в первую загрузку не попадает.
+    const { supabase } = await import('@/integrations/supabase/client');
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       toast.error(error.message);

@@ -1,7 +1,8 @@
 import { ArrowRight, BadgeCheck, Crown, MessageSquareHeart, Route } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
-import mentor from "@/assets/mentor-galina.jpg";
+import mentor from "@/assets/mentor-galina.webp";
+import mentorSmall from "@/assets/mentor-galina-560.webp";
 
 const FRAMEWORK = [
   {
@@ -29,8 +30,11 @@ export function Mentor({ onBook }: { onBook: () => void }) {
           <div className="from-primary/25 to-emerald/25 absolute -inset-4 rounded-[2rem] bg-gradient-to-br blur-2xl" />
           <img
             src={mentor}
+            srcSet={`${mentorSmall} 560w, ${mentor} 912w`}
+            sizes="(min-width: 1024px) 50vw, 100vw"
             alt="Галина Николаева, топ-наставник и лидер сетевого бизнеса"
             loading="lazy"
+            decoding="async"
             width={912}
             height={1104}
             className="relative w-full rounded-3xl border object-cover"

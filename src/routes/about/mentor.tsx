@@ -2,10 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/site/Navbar";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { useState } from "react";
-import { BookingModal } from "@/components/site/BookingModal";
+import { BookingModalLazy as BookingModal } from "@/components/site/BookingModalLazy";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Crown, Users, GraduationCap, Trophy } from "lucide-react";
-import mentor from "@/assets/mentor-galina.jpg";
+import mentor from "@/assets/mentor-galina.webp";
+import mentorSmall from "@/assets/mentor-galina-560.webp";
 
 export const Route = createFileRoute("/about/mentor")({
   head: () => ({
@@ -31,7 +32,13 @@ function MentorPage() {
               <div className="from-primary/25 to-emerald/25 absolute -inset-6 rounded-[3rem] bg-gradient-to-br blur-3xl" />
               <img
                 src={mentor}
+                srcSet={`${mentorSmall} 560w, ${mentor} 912w`}
+                sizes="(min-width: 1024px) 50vw, 100vw"
                 alt="Галина Николаева"
+                loading="lazy"
+                decoding="async"
+                width={912}
+                height={1104}
                 className="relative w-full rounded-[2rem] border-white/10 border object-cover shadow-2xl"
               />
               <div className="glass absolute -bottom-8 -left-4 lg:-left-12 p-6 rounded-3xl animate-float border-white/5 bg-[#161e2e]/80">

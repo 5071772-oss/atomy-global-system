@@ -8,7 +8,7 @@ import { DuplicationSystem } from "@/components/site/DuplicationSystem";
 import { IncomeCalculator } from "@/components/site/IncomeCalculator";
 import { Funnel } from "@/components/site/Funnel";
 import { SiteFooter } from "@/components/site/SiteFooter";
-import { BookingModal } from "@/components/site/BookingModal";
+import { BookingModalLazy as BookingModal } from "@/components/site/BookingModalLazy";
 
 const TITLE = "Atomy Global Engine — доход 91 000 ₽ в месяц";
 const DESCRIPTION =

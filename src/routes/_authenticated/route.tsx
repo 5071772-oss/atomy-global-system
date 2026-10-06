@@ -1,8 +1,10 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
-import { supabase } from '@/integrations/supabase/client'
 
 export const Route = createFileRoute('/_authenticated')({
   beforeLoad: async ({ location }) => {
+    // Клиент Supabase подключается здесь и только здесь: в первую загрузку сайта
+    // эта библиотека не попадает.
+    const { supabase } = await import('@/integrations/supabase/client')
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {
       throw redirect({
@@ -25,6 +27,7 @@ function AuthenticatedLayout() {
         <div className="flex items-center gap-4">
           <button 
             onClick={async () => {
+              const { supabase } = await import('@/integrations/supabase/client')
               await supabase.auth.signOut();
               window.location.href = '/';
             }}
